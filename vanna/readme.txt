@@ -1,0 +1,4 @@
+To start Vanna AI Standalone:
+- rename .env.sample to .env and add correct values for fields.
+- run setup.ps1 to prepare environment (you should use conda or one of others alternatives)
+- run python server.py
