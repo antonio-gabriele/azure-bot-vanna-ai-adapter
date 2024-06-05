@@ -2,3 +2,4 @@ src/.env
 src/vanna
 .env
 **/__pycache__
+vanna/chroma/
