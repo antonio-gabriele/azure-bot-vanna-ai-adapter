@@ -51,9 +51,9 @@ def answer():
         sql = vn.generate_sql(question=question)
         df = vn.run_sql(sql=sql)
         csv = df.to_csv()
-        return jsonify({"preview": df.head(10), "csv": csv, "sql": sql})
+        return jsonify({"json": df.to_dict(), "query": sql})
     except Exception as e:
-        return jsonify({"error": True, "detail" : sql})
+        return jsonify({"error": True, "detail" : sql, 'e': e})
 
 @app.route('/')
 def root():
