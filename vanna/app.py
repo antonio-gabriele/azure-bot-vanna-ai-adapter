@@ -14,43 +14,32 @@ class MyVanna(ChromaDB_VectorStore, OpenAI_Chat):
         ChromaDB_VectorStore.__init__(self, config={'path':'chroma'})
         OpenAI_Chat.__init__(self, config=config)
 
-print(CONFIG.OPENAI_APIKEY)
-print(CONFIG.MSSQL_CONNECTION_STRING)
-
 vn = MyVanna(config={'api_key': CONFIG.OPENAI_APIKEY, 'model': CONFIG.OPENAI_DEPLOYMENT})
 vn.connect_to_mssql(odbc_conn_str=CONFIG.MSSQL_CONNECTION_STRING)
 
-df = vn.get_training_data()
-if df.empty:
-    df_information_schema = vn.run_sql(CONFIG.MSSQL_BOOTSTRAP_QUERY)
-    plan = vn.get_training_plan_generic(df_information_schema)
-    vn.train(plan=plan)
+#df = vn.get_training_data()
+#if df.empty:
+df_information_schema = vn.run_sql(CONFIG.MSSQL_BOOTSTRAP_QUERY)
+plan = vn.get_training_plan_generic(df_information_schema)
+vn.allow_llm_to_see_data = True
+vn.train(plan=plan)
 
 response = requests.get(CONFIG.TRAINING_ENDPOINT)
 if response.ok:
     json = response.json()
-
-    questions = json.get('questions')
-    if questions is not None:
-        for item in questions:
-            question = item.get('question')
-            sql = item.get('sql')
-            print(f"{question}={sql}")
-            vn.train(question=question,sql=sql)
-
-    sqls = json.get('sqls')
-    if sqls is not None:
-        for item in sqls:
-            sql = item.get('sql')
-            print(f"={sql}")
-            vn.train(sql=sql)
-
-    documentations = json.get('documentations')
-    if documentations is not None:
-        for item in documentations:
+    items = json.get('items')
+    if items is not None:
+        for item in items:
             documentation = item.get('documentation')
-            print(f"{documentation}=")
-            vn.train(documentation=documentation)
+            query = item.get('query')
+            type = item.get('type')
+            print(f"{documentation}={query}")
+            if type == 'documentation':
+                vn.train(documentation=documentation)
+            elif type == 'question':
+                vn.train(question=documentation,sql=query)
+            elif type == 'query':
+                vn.train(sql=query)
 
 app = Flask(__name__, static_url_path='')
 
@@ -71,4 +60,4 @@ def root():
     return app.send_static_file('index.html')
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8080)
+    app.run(debug=True, host='0.0.0.0', port=8080)
