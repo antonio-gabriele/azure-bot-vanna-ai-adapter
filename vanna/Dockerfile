@@ -12,9 +12,9 @@ RUN ACCEPT_EULA=Y apt-get install -y msodbcsql18 unixodbc-dev
 WORKDIR /opt/app
 
 RUN pip3 install --upgrade pip
-RUN pip install vanna[openai,chromadb]
+RUN pip install vanna[openai]
 RUN pip install pyodbc
-
+RUN pip install azure-search-documents
 COPY config.py .
 COPY app.py .
 COPY index.html .
