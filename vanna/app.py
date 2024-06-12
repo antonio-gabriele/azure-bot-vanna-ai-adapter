@@ -1,5 +1,5 @@
 from vanna.openai import OpenAI_Chat
-from vanna.chromadb import ChromaDB_VectorStore
+from azureai import AzureAISearch
 from flask import Flask, jsonify, request
 from config import DefaultConfig
 from dotenv import load_dotenv, find_dotenv
@@ -9,9 +9,9 @@ load_dotenv(find_dotenv())
 
 CONFIG = DefaultConfig()
 
-class MyVanna(ChromaDB_VectorStore, OpenAI_Chat):
+class MyVanna(AzureAISearch, OpenAI_Chat):
     def __init__(self, config=None):
-        ChromaDB_VectorStore.__init__(self, config={'path':'chroma'})
+        AzureAISearch.__init__(self, config={'key':CONFIG.AZUREAISEARCH_APIKEY, 'endpoint': CONFIG.AZUREAISEARCH_ENDPOINT, 'prefix':CONFIG.AZUREAISEARCH_PREFIX})
         OpenAI_Chat.__init__(self, config=config)
 
 vn = MyVanna(config={'api_key': CONFIG.OPENAI_APIKEY, 'model': CONFIG.OPENAI_DEPLOYMENT})
